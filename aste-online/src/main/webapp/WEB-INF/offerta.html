@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--/* Specify the language of the page and the direction, left-to-right */-->
+<html lang="it" dir="ltr">
+  <head>
+  	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+    <title>Offerte</title>
+
+	<link rel="icon" href="#" th:href="@{/img/icon.png}">
+    <link rel="stylesheet" type="text/css" href="#" th:href="@{/css/main.css}">
+    <link rel="stylesheet" type="text/css" href="#" th:href="@{/css/auctions-offers.css}">
+    <link rel="stylesheet" type="text/css" href="#" th:href="@{/css/auction-details.css}">
+    <link rel="stylesheet" type="text/css" href="#" th:href="@{/css/offerta.css}">
+  </head>
+  <body>
+	<!--/* th:remove="tag" removes only the containing tag, but not the text */-->
+	<!--/* th:remove="all" removes both the tag and the children, text included */-->
+	<p th:remove="all">Questa è una pagina dinamica, viene generata a runtime, non è previsto un accesso diretto!</p>
+    <div class="col lft-col">
+      <div class="quick-nav">
+        <h3>Navigazione Rapida</h3>
+        <ul>
+          <a href="#dtl-art"><li>Dettagli</li></a>
+          <a href="#dtl-offers"><li>Offerte</li></a>
+          <a href="#offr-new"><li>Nuova offerta</li></a>
+        </ul>
+      </div>
+    </div>
+    <div class="col mid-col">
+      <div class="row first-row details">
+        <h2 th:if="${auction == null or isExpired}">Informazioni</h2>
+        <!--/* The paragraph exists only if the auction is null */-->
+        <p th:if="${auction == null}">L' asta selezionata non esiste!</p>
+        <!--/* The paragraph exists only if the auction is expired */-->
+        <p th:if="${isExpired}">L' asta per l' articolo selezionato è scaduta!</p>
+        <!--/* th:if="${auction != null}" is used to ensure that the auction exists 
+        the section is created along with it's children only if the condition
+        is true */-->
+        <section th:if="${auction != null and not isExpired}">
+            <div th:replace="@{WEB-INF/fragments.html} :: showDetails">
+
+			<!--/* Here a fragment is used, since this piece of markup is identical to 
+			the one used inside dettagli.html, it is written once and used twice.
+			The div is replaced by the fragment's one, along with it's children */-->
+
+            </div>
+        </section>
+      </div>
+      <!--/* The offers table is shown only if the auction exists and it's not expired. */-->
+      <div class="row second-row offers-list" th:if="${auction != null and not isExpired}">
+		<section th:replace="@{WEB-INF/fragments.html} :: showOffers(0)">
+		
+			<!--/* Here a parameterized fragment is used, since this piece of markup is identical to 
+			the one used inside dettagli.html, it is written once and used twice.
+			The parameter is required by the fragment in order to distinguish between the 2 pages.
+			The section is replaced by the fragment's one, along with it's children. */-->
+		
+		</section>
+      </div>
+      <!--/* If the auction doesn't exist or is expired the form to make an offer is not shown */-->
+      <div class="row third-row form" th:if="${auction != null and not isExpired}">
+      	<h2 id="offr-new">Nuova offerta</h2>
+          <form action="#" th:action="MakeOffer" method="post" th:if="${auction != null and not isExpired}">
+	          <div>
+	          	<label for="offer">Valore:</label>
+		    	<!-- /*
+		    	(1)If there is at least an offer for the specified auction:
+				 - The minimum value is equal to the minimum upside offer plus
+				   the value of the maximum offer
+				(2)If there are no offers for the specified auction:
+				 - The minimum value is equal to the minimum the initial price of the auction
+				(3)The maximum one is always 2 billions! */-->
+				<!--/*
+				(4) th:with sets the value of the "min" variable, that is used to set the "min" and "value" attributes */-->
+				<input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" th:min="${min}" th:value="${min}" th:with="min=${not offers.isEmpty()} ? ${maxAuctionOffer.value + auction.minUpsideOffer} : ${auction.initialPrice}" required>
+				<!-- Shows the euro's symbol on the right side of the input field -->
+	   			<span> &euro;</span>
+				<!--/* This hidden field is used to tell the controller which is the id of the auction the user wants to make an offer for */-->
+				<input type="hidden" name="auctionId" th:value="${auction.id}">
+			</div>
+			<button name="offer-submit" type="submit">Conferma</button>
+		</form>
+      </div>
+    </div>
+    <div class="col rgt-col">
+      <div class="quick-nav menu">
+        <h3>Menu</h3>
+        <ul>
+          <a href="#" th:href="@{/home.jsp}"><li>Home</li></a>
+          <a href="#" th:href="@{/GoToAcquisto}"><li>Acquista</li></a>
+          <a href="#" th:href="@{/GoToVendo}"><li>Vendi</li></a>
+          <a href="#" th:href="@{/Logout}"><li>Esci</li></a>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
